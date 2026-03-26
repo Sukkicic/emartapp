@@ -17,8 +17,8 @@ services:
     restart: always
     container_name: api
     depends_on:
-      emongo:
-        condition: service_healthy
+      - nginx
+      - emongo
 
   webapi:
     build:
@@ -28,8 +28,7 @@ services:
     restart: always
     container_name: webapi
     depends_on:
-      emartdb:
-        condition: service_healthy
+      - emartdb
 
   nginx:
     restart: always
@@ -47,13 +46,6 @@ services:
       - MONGO_INITDB_DATABASE=epoc
     ports:
       - "27017:27017"
-    volumes:
-      - emongo-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   emartdb:
     image: mysql:8.0.33
@@ -63,16 +55,3 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=emartdbpass
       - MYSQL_DATABASE=books
-      - MYSQL_USER=emartuser
-      - MYSQL_PASSWORD=emartpass
-    volumes:
-      - emartdb-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pemartdbpass"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  emongo-data:
-  emartdb-data:
